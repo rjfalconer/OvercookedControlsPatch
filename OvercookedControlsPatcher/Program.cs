@@ -6,29 +6,29 @@ using Assembly = System.Reflection.Assembly;
 
 namespace OvercookedControlsPatcher
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            string installDir = SearchInstallDir();
+            var installDir = SearchInstallDir();
             
             while (installDir == null)
             {
                 Console.WriteLine("Could not find Overcooked, please enter path to Overcooked.exe:");
-                string path = Console.In.ReadLine();
+                var path = Console.In.ReadLine();
                 if (!File.Exists(path) && !Directory.Exists(path))
                 {
                     Console.WriteLine("'"+path+"' does not exist");
                     continue;
                 }
-                string dir = Path.GetDirectoryName(path);
-                string curDllPath = Path.Combine(dir, "Overcooked_Data", "Managed", "Assembly-CSharp.dll");
+                var dir = Path.GetDirectoryName(path);
+                var curDllPath = Path.Combine(dir, "Overcooked_Data", "Managed", "Assembly-CSharp.dll");
                 if (File.Exists(curDllPath))
                 {
                     installDir = dir;
                 }
             }
-            string dllPath = Path.Combine(installDir, "Overcooked_Data", "Managed", "Assembly-CSharp.dll");
+            var dllPath = Path.Combine(installDir, "Overcooked_Data", "Managed", "Assembly-CSharp.dll");
 
             File.Copy(dllPath, dllPath + ".bak");
 
@@ -44,8 +44,8 @@ namespace OvercookedControlsPatcher
 
         private static void WriteResourceToDisk(string installDir, string resName, string filename)
         {
-            string[] names = typeof(Program).Assembly.GetManifestResourceNames();
-            using (Stream input = typeof(Program).Assembly.GetManifestResourceStream(resName))
+            var names = typeof(Program).Assembly.GetManifestResourceNames();
+            using (var input = typeof(Program).Assembly.GetManifestResourceStream(resName))
             using (Stream output = File.Create(Path.Combine(installDir, filename)))
             {
                 input.CopyTo(output);
@@ -102,7 +102,7 @@ namespace OvercookedControlsPatcher
                     var targetType = asmTarget.MainModule.GetType(replaceMethodMeta.targetType);
 
                     // Not exactly right, but good enough for now.
-                    MethodDefinition targetMethod = targetType.Methods.First(m =>
+                    var targetMethod = targetType.Methods.First(m =>
                             m.Name == patchMethod.Name && patchMethod.Parameters.Count == m.Parameters.Count);
 
                     PatchTools.ReplaceMethod(targetMethod, patchMethod);

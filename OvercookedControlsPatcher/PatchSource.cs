@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using InControl;
 
 namespace OvercookedControlsPatcher
 {
-    class PatchSource
+    internal class PatchSource
     {
         [AddMethod(nameof(StandardActionSet))]
         private static bool LoadControlsFromFile(StandardActionSet actionSet, string filename)
@@ -16,49 +15,49 @@ namespace OvercookedControlsPatcher
                 return false;
             }
 
-            string[] lines = File.ReadAllLines(filename);
+            var lines = File.ReadAllLines(filename);
             if (lines.Length <= 1)
             {
                 return false;
             }
 
-            HashSet<string> validButtonNames = new HashSet<string>(Enum.GetNames(typeof(ControlPadInput.Button)));
-            HashSet<string> validValueNames = new HashSet<string>(Enum.GetNames(typeof(ControlPadInput.Value)));
-            HashSet<string> validKeyNames = new HashSet<string>(Enum.GetNames(typeof(Key)));
-            for (int i = 0; i < lines.Length; i++)
+            var validButtonNames = new HashSet<string>(Enum.GetNames(typeof(ControlPadInput.Button)));
+            var validValueNames = new HashSet<string>(Enum.GetNames(typeof(ControlPadInput.Value)));
+            var validKeyNames = new HashSet<string>(Enum.GetNames(typeof(Key)));
+            foreach (var line in lines)
             {
-                if (!lines[i].StartsWith("#"))
+                if (line.StartsWith("#"))
+                    continue;
+
+                var seperators = new List<char> { '=', '#', '.' };
+                var lineParts = line.Replace(" ", "").Split(seperators.ToArray());
+                if (lineParts.Length < 3 || !validKeyNames.Contains(lineParts[2]))
+                    continue;
+
+                var key = (Key)Enum.Parse(typeof(Key), lineParts[2], true);
+                if (lineParts[0].Equals("Button") && validButtonNames.Contains(lineParts[1]))
                 {
-                    List<char> seperators = new List<char> {'=', '#', '.'};
-                    string[] lineParts = lines[i].Replace(" ", "").Split(seperators.ToArray());
-                    if (lineParts.Length >= 3 && validKeyNames.Contains(lineParts[2]))
+                    var button = (ControlPadInput.Button)Enum.Parse(typeof(ControlPadInput.Button), lineParts[1], true);
+                    actionSet.ButtonActions[button].AddDefaultBinding(new Key[]
                     {
-                        Key key = (Key) Enum.Parse(typeof(Key), lineParts[2], true);
-                        if (lineParts[0].Equals("Button") && validButtonNames.Contains(lineParts[1]))
-                        {
-                            var button = (ControlPadInput.Button) Enum.Parse(typeof(ControlPadInput.Button), lineParts[1], true);
-                            actionSet.ButtonActions[button].AddDefaultBinding(new Key[]
-                            {
-                                key
-                            });
-                        }
-                        else if (lineParts[0].Equals("PosVal") && validValueNames.Contains(lineParts[1]))
-                        {
-                            var value = (ControlPadInput.Value) Enum.Parse(typeof(ControlPadInput.Value), lineParts[1], true);
-                            actionSet.m_pveValueActions[value].AddDefaultBinding(new Key[]
-                            {
-                                key
-                            });
-                        }
-                        else if (lineParts[0].Equals("NegVal") && validValueNames.Contains(lineParts[1]))
-                        {
-                            var value = (ControlPadInput.Value) Enum.Parse(typeof(ControlPadInput.Value), lineParts[1], true);
-                            actionSet.m_nveValueActions[value].AddDefaultBinding(new Key[]
-                            {
-                                key
-                            });
-                        }
-                    }
+                        key
+                    });
+                }
+                else if (lineParts[0].Equals("PosVal") && validValueNames.Contains(lineParts[1]))
+                {
+                    var value = (ControlPadInput.Value)Enum.Parse(typeof(ControlPadInput.Value), lineParts[1], true);
+                    actionSet.m_pveValueActions[value].AddDefaultBinding(new Key[]
+                    {
+                        key
+                    });
+                }
+                else if (lineParts[0].Equals("NegVal") && validValueNames.Contains(lineParts[1]))
+                {
+                    var value = (ControlPadInput.Value)Enum.Parse(typeof(ControlPadInput.Value), lineParts[1], true);
+                    actionSet.m_nveValueActions[value].AddDefaultBinding(new Key[]
+                    {
+                        key
+                    });
                 }
             }
 
@@ -91,8 +90,8 @@ namespace OvercookedControlsPatcher
         [AddMethod(nameof(PCPadInputProvider))]
         public static string[] GetControlFiles()
         {
-            List<string> files = new List<string>();
-            for (int i = 1; i < 6; ++i) //Can't do Directory.GetFiles because of exception handler issues
+            var files = new List<string>();
+            for (var i = 1; i < 6; ++i) //Can't do Directory.GetFiles because of exception handler issues
             {
                 var path = "input_keyboard_" + i + ".txt";
                 if (File.Exists(path))
@@ -114,19 +113,19 @@ namespace OvercookedControlsPatcher
                 {
                     foreach (var file in controlFiles)
                     {
-                        global::PCPadInputProvider.m_allDevices.Add(CreateKeyboardForControlFile(file));
+                        PCPadInputProvider.m_allDevices.Add(CreateKeyboardForControlFile(file));
                     }
 
                     keyboardInitialized = true;
                 }
             }
-            global::PCPadInputProvider.UpdateKeyboardButtons();
+            PCPadInputProvider.UpdateKeyboardButtons();
         }
 
         [AddMethod(nameof(StandardActionSet))]
         public static StandardActionSet CreateKeyboardForControlFile(string filename)
         {
-            StandardActionSet actionSet = new StandardActionSet();
+            var actionSet = new StandardActionSet();
             actionSet.ResetActions();
             LoadControlsFromFile(actionSet, filename);
             return actionSet;

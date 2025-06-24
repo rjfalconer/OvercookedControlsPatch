@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 
 namespace OvercookedControlsPatcher
 {
-    class PatchTools
+    internal class PatchTools
     {
         /// Modified from https://groups.google.com/forum/#!msg/mono-cecil/uoMLJEZrQ1Q/ewthqjEk-jEJ
         /// <summary>
@@ -25,39 +25,39 @@ namespace OvercookedControlsPatcher
         public static MethodDefinition CopyMethod(TypeDefinition copyToTypedef, MethodDefinition sourceMethod)
         {
 
-            ModuleDefinition targetModule = copyToTypedef.Module;
+            var targetModule = copyToTypedef.Module;
 
             // create a new MethodDefinition; all the content of sourceMethod will be copied to this new MethodDefinition
 
-            MethodDefinition targetMethod = new MethodDefinition(sourceMethod.Name, sourceMethod.Attributes, targetModule.ImportReference(sourceMethod.ReturnType));
+            var targetMethod = new MethodDefinition(sourceMethod.Name, sourceMethod.Attributes, targetModule.ImportReference(sourceMethod.ReturnType));
 
 
             // Copy the parameters; 
-            foreach (ParameterDefinition p in sourceMethod.Parameters)
+            foreach (var p in sourceMethod.Parameters)
             {
-                ParameterDefinition nP = new ParameterDefinition(p.Name, p.Attributes, targetModule.ImportReference(p.ParameterType));
+                var nP = new ParameterDefinition(p.Name, p.Attributes, targetModule.ImportReference(p.ParameterType));
                 targetMethod.Parameters.Add(nP);
             }
 
             // copy the body
-            MethodBody nBody = targetMethod.Body;
-            MethodBody oldBody = sourceMethod.Body;
+            var nBody = targetMethod.Body;
+            var oldBody = sourceMethod.Body;
 
             nBody.InitLocals = oldBody.InitLocals;
 
             // copy the local variable definition
-            foreach (VariableDefinition v in oldBody.Variables)
+            foreach (var v in oldBody.Variables)
             {
-                VariableDefinition nv = new VariableDefinition(targetModule.ImportReference(v.VariableType));
+                var nv = new VariableDefinition(targetModule.ImportReference(v.VariableType));
                 //v.Name, 
                 nBody.Variables.Add(nv);
             }
 
             // copy the IL; we only need to take care of reference and method definitions
-            Mono.Collections.Generic.Collection<Instruction> col = nBody.Instructions;
-            foreach (Instruction i in oldBody.Instructions)
+            var col = nBody.Instructions;
+            foreach (var i in oldBody.Instructions)
             {
-                object operand = i.Operand;
+                var operand = i.Operand;
                 if (operand == null)
                 {
                     col.Add(Instruction.Create(i.OpCode));
@@ -65,14 +65,13 @@ namespace OvercookedControlsPatcher
 
                 // for any methodef that this method calls, we will copy it
 
-                else if (operand is MethodDefinition)
+                else if (operand is MethodDefinition dmethod)
                 {
-                    MethodDefinition dmethod = operand as MethodDefinition;
-                    MethodDefinition newMethod = copyToTypedef.Methods.FirstOrDefault(f =>
+                    var newMethod = copyToTypedef.Methods.FirstOrDefault(f =>
                         f.Name == dmethod.Name && f.Parameters.Count == dmethod.Parameters.Count);
                     if (newMethod == null)
                     {
-                        var addMethodMeta = OvercookedControlsPatcher.AddMethod.Read(dmethod);
+                        var addMethodMeta = AddMethod.Read(dmethod);
                         if (addMethodMeta != null)
                         {
                             var targetType = targetMethod.Module.GetType(addMethodMeta.targetType);
@@ -83,9 +82,8 @@ namespace OvercookedControlsPatcher
                 }
 
                 // for member reference, import it
-                else if (operand is FieldReference)
+                else if (operand is FieldReference fref)
                 {
-                    FieldReference fref = operand as FieldReference;
                     FieldReference newf;
                     if (fref.DeclaringType == sourceMethod.DeclaringType)
                     {
@@ -99,22 +97,19 @@ namespace OvercookedControlsPatcher
                     }
                     col.Add(Instruction.Create(i.OpCode, newf));
                 }
-                else if (operand is TypeReference)
+                else if (operand is TypeReference tref)
                 {
-                    TypeReference tref = operand as TypeReference;
-                    TypeReference newf = targetModule.ImportReference(tref);
+                    var newf = targetModule.ImportReference(tref);
                     col.Add(Instruction.Create(i.OpCode, newf));
                 }
-                else if (operand is TypeDefinition)
+                else if (operand is TypeDefinition tdef)
                 {
-                    TypeDefinition tdef = operand as TypeDefinition;
-                    TypeReference newf = targetModule.ImportReference(tdef);
+                    var newf = targetModule.ImportReference(tdef);
                     col.Add(Instruction.Create(i.OpCode, newf));
                 }
-                else if (operand is MethodReference)
+                else if (operand is MethodReference mref)
                 {
-                    MethodReference mref = operand as MethodReference;
-                    MethodReference newf = targetModule.ImportReference(mref);
+                    var newf = targetModule.ImportReference(mref);
                     col.Add(Instruction.Create(i.OpCode, newf));
                 }
                 else
@@ -125,10 +120,9 @@ namespace OvercookedControlsPatcher
             }
 
             // copy the exception handler blocks
-
-            foreach (ExceptionHandler eh in oldBody.ExceptionHandlers)
+            foreach (var eh in oldBody.ExceptionHandlers)
             {
-                ExceptionHandler neh = new ExceptionHandler(eh.HandlerType);
+                var neh = new ExceptionHandler(eh.HandlerType);
                 if (eh.CatchType != null)
                 {
                     neh.CatchType = targetModule.ImportReference(eh.CatchType);
@@ -137,12 +131,12 @@ namespace OvercookedControlsPatcher
                 // we need to setup neh.Start and End; these are instructions; we need to locate it in the source by index
                 if (eh.TryStart != null)
                 {
-                    int idx = oldBody.Instructions.IndexOf(eh.TryStart);
+                    var idx = oldBody.Instructions.IndexOf(eh.TryStart);
                     neh.TryStart = col[idx];
                 }
                 if (eh.TryEnd != null)
                 {
-                    int idx = oldBody.Instructions.IndexOf(eh.TryEnd);
+                    var idx = oldBody.Instructions.IndexOf(eh.TryEnd);
                     neh.TryEnd = col[idx];
                 }
 
@@ -157,53 +151,54 @@ namespace OvercookedControlsPatcher
 
         public static void ReplaceMethod(MethodDefinition targetMethod, MethodDefinition sourceMethod)
         {
-            ModuleDefinition targetModule = targetMethod.DeclaringType.Module;
+            var targetModule = targetMethod.DeclaringType.Module;
 
             // Create second method with original code
-            MethodDefinition realMethod = new MethodDefinition(targetMethod.Name+"_old", targetMethod.Attributes, targetMethod.ReturnType);
+            var realMethod = new MethodDefinition(targetMethod.Name + "_old", targetMethod.Attributes, targetMethod.ReturnType);
             {
                 // Copy the parameters
-                foreach (ParameterDefinition p in targetMethod.Parameters)
+                foreach (var p in targetMethod.Parameters)
                 {
-                    ParameterDefinition nP = new ParameterDefinition(p.Name, p.Attributes, p.ParameterType);
+                    var nP = new ParameterDefinition(p.Name, p.Attributes, p.ParameterType);
                     realMethod.Parameters.Add(nP);
                 }
 
                 // Copy method contents
-                MethodBody nBody = realMethod.Body;
-                MethodBody oldBody = targetMethod.Body;
+                var nBody = realMethod.Body;
+                var oldBody = targetMethod.Body;
                 nBody.InitLocals = oldBody.InitLocals;
 
                 // copy the local variable definition
-                foreach (VariableDefinition v in oldBody.Variables)
+                foreach (var v in oldBody.Variables)
                 {
-                    VariableDefinition nv = new VariableDefinition(v.VariableType);
+                    var nv = new VariableDefinition(v.VariableType);
                     nBody.Variables.Add(nv);
                 }
 
                 // copy the IL
-                Mono.Collections.Generic.Collection<Instruction> col = nBody.Instructions;
-                foreach (Instruction i in oldBody.Instructions)
+                var col = nBody.Instructions;
+                foreach (var i in oldBody.Instructions)
                 {
                     col.Add(i);
                 }
 
                 // copy the exception handler blocks
-
-                foreach (ExceptionHandler eh in oldBody.ExceptionHandlers)
+                foreach (var eh in oldBody.ExceptionHandlers)
                 {
-                    ExceptionHandler neh = new ExceptionHandler(eh.HandlerType);
-                    neh.CatchType = eh.CatchType;
+                    var neh = new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType
+                    };
 
                     // we need to setup neh.Start and End; these are instructions; we need to locate it in the source by index
                     if (eh.TryStart != null)
                     {
-                        int idx = oldBody.Instructions.IndexOf(eh.TryStart);
+                        var idx = oldBody.Instructions.IndexOf(eh.TryStart);
                         neh.TryStart = col[idx];
                     }
                     if (eh.TryEnd != null)
                     {
-                        int idx = oldBody.Instructions.IndexOf(eh.TryEnd);
+                        var idx = oldBody.Instructions.IndexOf(eh.TryEnd);
                         neh.TryEnd = col[idx];
                     }
 
@@ -217,40 +212,38 @@ namespace OvercookedControlsPatcher
             // Replace original methods IL with proxy code
             {
                 // copy the body
-                MethodBody nBody = targetMethod.Body;
-                MethodBody oldBody = sourceMethod.Body;
+                var nBody = targetMethod.Body;
+                var oldBody = sourceMethod.Body;
 
                 nBody.InitLocals = oldBody.InitLocals;
 
                 // copy the local variable definition
                 nBody.Variables.Clear();
-                foreach (VariableDefinition v in oldBody.Variables)
+                foreach (var v in oldBody.Variables)
                 {
-                    VariableDefinition nv = new VariableDefinition(targetModule.ImportReference(v.VariableType));
+                    var nv = new VariableDefinition(targetModule.ImportReference(v.VariableType));
                     nBody.Variables.Add(nv);
                 }
 
                 // copy the IL; we only need to take care of reference and method definitions
                 var col = nBody.Instructions;
                 col.Clear();
-                foreach (Instruction i in oldBody.Instructions)
+                foreach (var i in oldBody.Instructions)
                 {
-                    object operand = i.Operand;
+                    var operand = i.Operand;
                     if (operand == null)
                     {
                         col.Add(Instruction.Create(i.OpCode));
                     }
 
                     // for any methoddef that this method calls, we will copy it
-
-                    else if (operand is MethodDefinition)
+                    else if (operand is MethodDefinition dmethod)
                     {
-                        MethodDefinition dmethod = operand as MethodDefinition;
-                        MethodDefinition newMethod = targetMethod.DeclaringType.Methods.FirstOrDefault(f =>
+                        var newMethod = targetMethod.DeclaringType.Methods.FirstOrDefault(f =>
                             f.Name == dmethod.Name && f.Parameters.Count == dmethod.Parameters.Count);
                         if (newMethod == null)
                         {
-                            var addMethodMeta = OvercookedControlsPatcher.AddMethod.Read(dmethod);
+                            var addMethodMeta = AddMethod.Read(dmethod);
                             if (addMethodMeta != null)
                             {
                                 var targetType = targetMethod.Module.GetType(addMethodMeta.targetType);
@@ -261,9 +254,8 @@ namespace OvercookedControlsPatcher
                     }
 
                     // for member reference, import it
-                    else if (operand is FieldReference)
+                    else if (operand is FieldReference fref)
                     {
-                        FieldReference fref = operand as FieldReference;
                         FieldReference newf;
                         if (fref.DeclaringType == sourceMethod.DeclaringType)
                         {
@@ -277,21 +269,18 @@ namespace OvercookedControlsPatcher
                         }
                         col.Add(Instruction.Create(i.OpCode, newf));
                     }
-                    else if (operand is TypeReference)
+                    else if (operand is TypeReference tref)
                     {
-                        TypeReference tref = operand as TypeReference;
-                        TypeReference newf = targetModule.ImportReference(tref);
+                        var newf = targetModule.ImportReference(tref);
                         col.Add(Instruction.Create(i.OpCode, newf));
                     }
-                    else if (operand is TypeDefinition)
+                    else if (operand is TypeDefinition tdef)
                     {
-                        TypeDefinition tdef = operand as TypeDefinition;
-                        TypeReference newf = targetModule.ImportReference(tdef);
+                        var newf = targetModule.ImportReference(tdef);
                         col.Add(Instruction.Create(i.OpCode, newf));
                     }
-                    else if (operand is MethodReference)
+                    else if (operand is MethodReference mref)
                     {
-                        MethodReference mref = operand as MethodReference;
                         MethodReference newf = null;
 
                         /*MethodDefinition mdef = mref.Resolve();
@@ -299,7 +288,8 @@ namespace OvercookedControlsPatcher
                         {
                             newf = targetModule.ImportReference(targetMethod);
                         }
-                        else */if (mref.FullName.Equals(targetMethod.FullName))
+                        else */
+                        if (mref.FullName.Equals(targetMethod.FullName))
                         //else if (mdef == targetMethod)
                         {
                             newf = targetModule.ImportReference(realMethod);
@@ -319,9 +309,9 @@ namespace OvercookedControlsPatcher
 
                 // copy the exception handler blocks
                 nBody.ExceptionHandlers.Clear();
-                foreach (ExceptionHandler eh in oldBody.ExceptionHandlers)
+                foreach (var eh in oldBody.ExceptionHandlers)
                 {
-                    ExceptionHandler neh = new ExceptionHandler(eh.HandlerType);
+                    var neh = new ExceptionHandler(eh.HandlerType);
                     if (eh.CatchType != null)
                     {
                         neh.CatchType = targetModule.ImportReference(eh.CatchType);
@@ -330,12 +320,12 @@ namespace OvercookedControlsPatcher
                     // we need to setup neh.Start and End; these are instructions; we need to locate it in the source by index
                     if (eh.TryStart != null)
                     {
-                        int idx = oldBody.Instructions.IndexOf(eh.TryStart);
+                        var idx = oldBody.Instructions.IndexOf(eh.TryStart);
                         neh.TryStart = col[idx];
                     }
                     if (eh.TryEnd != null)
                     {
-                        int idx = oldBody.Instructions.IndexOf(eh.TryEnd);
+                        var idx = oldBody.Instructions.IndexOf(eh.TryEnd);
                         neh.TryEnd = col[idx];
                     }
 
@@ -346,7 +336,7 @@ namespace OvercookedControlsPatcher
 
         public static void AddField(TypeDefinition targetType, FieldDefinition patchField)
         {
-            ModuleDefinition targetModule = targetType.Module;
+            var targetModule = targetType.Module;
             targetType.Fields.Add(new FieldDefinition(patchField.Name, patchField.Attributes, targetModule.ImportReference(patchField.FieldType)));
         }
     }
