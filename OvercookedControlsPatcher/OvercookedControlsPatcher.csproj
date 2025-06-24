@@ -35,10 +35,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <OvercookedDir>$(OvercookedPath)</OvercookedDir> <!-- Set in Directory.Build.props -->
+  </PropertyGroup>
+  <Target Name="CheckOvercookedPath" BeforeTargets="Build">
+    <Error Condition="'$(OvercookedDir)' == ''" Text="OvercookedPath is not set. Please specify the game install path via Directory.Build.props file (see .example)" />
+  </Target>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp-mod, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Assembly-CSharp" Condition="!Exists('$(OvercookedPath)\Overcooked_Data\Managed\Assembly-CSharp-mod.dll')">
+      <HintPath>$(OvercookedPath)\Overcooked_Data\Managed\Assembly-CSharp.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Tools\Epic Games\Overcooked\Overcooked_Data\Managed\Assembly-CSharp-mod.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.11.2.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.11.2\lib\net40\Mono.Cecil.dll</HintPath>
@@ -57,10 +63,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>D:\Tools\Epic Games\Overcooked\Overcooked_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>$(OvercookedPath)\Overcooked_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="XInputDotNetPure">
-      <HintPath>D:\Tools\Epic Games\Overcooked\Overcooked_Data\Managed\XInputDotNetPure.dll</HintPath>
+      <HintPath>$(OvercookedPath)\Overcooked_Data\Managed\XInputDotNetPure.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
