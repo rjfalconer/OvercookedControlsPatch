@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<OvercookedDir>$(OvercookedPath)</OvercookedDir>
+    <InputAssembly>$(OvercookedDir)\Overcooked_Data\Managed\Assembly-CSharp.dll</InputAssembly>
+    <OutputAssembly>$(OvercookedDir)\Overcooked_Data\Managed\Assembly-CSharp-mod.dll</OutputAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+  </ItemGroup>
+
+  <Target Name="CheckOvercookedPath" BeforeTargets="Build">
+    <Error Condition="'$(OvercookedDir)' == ''" Text="OvercookedPath is not set. Please specify the game install path in Directory.Build.props" />
+  </Target>
+
+  <Target Name="GenerateModAssembly" AfterTargets="Build">
+    <Exec Command="&quot;$(TargetDir)GeneratePublicAssembly.exe&quot; &quot;$(InputAssembly)&quot;" />
+  </Target>
+
+</Project>
