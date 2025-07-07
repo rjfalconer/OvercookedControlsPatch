@@ -11,14 +11,14 @@ namespace OvercookedControlsPatcher
         private static void Main(string[] args)
         {
             var installDir = SearchInstallDir();
-            
+
             while (installDir == null)
             {
                 Console.WriteLine("Could not find Overcooked, please enter path to Overcooked.exe:");
                 var path = Console.In.ReadLine();
                 if (!File.Exists(path) && !Directory.Exists(path))
                 {
-                    Console.WriteLine("'"+path+"' does not exist");
+                    Console.WriteLine("'" + path + "' does not exist");
                     continue;
                 }
                 var dir = Path.GetDirectoryName(path);
@@ -30,7 +30,7 @@ namespace OvercookedControlsPatcher
             }
             var dllPath = Path.Combine(installDir, "Overcooked_Data", "Managed", "Assembly-CSharp.dll");
 
-            File.Copy(dllPath, dllPath + ".bak");
+            File.Copy(dllPath, dllPath + ".bak", true);
 
             PatchAssembly(dllPath);
 
@@ -68,9 +68,9 @@ namespace OvercookedControlsPatcher
         private static void PatchAssembly(string file)
         {
             var asmSelf = AssemblyDefinition.ReadAssembly(Assembly.GetExecutingAssembly().Location);
-            var patchType = asmSelf.MainModule.GetType(nameof(OvercookedControlsPatcher)+"."+nameof(PatchSource));
+            var patchType = asmSelf.MainModule.GetType(nameof(OvercookedControlsPatcher) + "." + nameof(PatchSource));
 
-            var asmTarget = AssemblyDefinition.ReadAssembly(file, new ReaderParameters() { ReadWrite = true });
+            var asmTarget = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadWrite = true });
 
             foreach (var patchField in patchType.Fields)
             {

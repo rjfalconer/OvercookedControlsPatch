@@ -65,6 +65,7 @@ namespace OvercookedControlsPatcher
         }
 
         [ReplaceMethod(nameof(StandardActionSet))]
+        // ReSharper disable once IdentifierTypo // This typo is present in the target dll
         public static void ModifiyForCombinedKeyboard(StandardActionSet actionSet)
         {
             if (StandardActionSet.LoadControlsFromFile(actionSet, "input_combined.txt"))
@@ -75,6 +76,7 @@ namespace OvercookedControlsPatcher
         }
 
         [ReplaceMethod(nameof(StandardActionSet))]
+        // ReSharper disable once IdentifierTypo // This typo is present in the target dll
         public static void ModifiyForSplitKeyboard(StandardActionSet actionSet)
         {
             if (StandardActionSet.LoadControlsFromFile(actionSet, "input_split.txt"))

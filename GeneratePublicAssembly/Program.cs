@@ -1,15 +1,20 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-record FieldPatch(string TypeName, string FieldName);
-record MethodPatch(string TypeName, string MethodName, int ParameterCount);
-record ConstructorPatch(string TypeName);
-record MethodStub(string TypeName, string MethodName, string ReturnType, string[] ParameterTypes);
+namespace GeneratePublicAssembly;
+
+internal record FieldPatch(string TypeName, string FieldName);
+internal record MethodPatch(string TypeName, string MethodName, int ParameterCount);
+internal record ConstructorPatch(string TypeName);
+internal record MethodStub(string TypeName, string MethodName, string ReturnType, string[] ParameterTypes);
 
 
-class Program
+/// <summary>
+/// Modify the original Overcooked assembly so the patcher can operate upon it
+/// </summary>
+internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         if (args.Length != 1 || !File.Exists(args[0]))
         {
@@ -62,7 +67,7 @@ class Program
         Console.WriteLine($"Wrote modified assembly to: {outputPath}");
     }
 
-    static void MakeFieldPublic(ModuleDefinition module, FieldPatch patch)
+    private static void MakeFieldPublic(ModuleDefinition module, FieldPatch patch)
     {
         var type = module.Types.FirstOrDefault(t => t.Name == patch.TypeName);
         var field = type?.Fields.FirstOrDefault(f => f.Name == patch.FieldName);
@@ -75,7 +80,7 @@ class Program
         }
     }
 
-    static void MakeMethodPublic(ModuleDefinition module, MethodPatch patch)
+    private static void MakeMethodPublic(ModuleDefinition module, MethodPatch patch)
     {
         var type = module.Types.FirstOrDefault(t => t.Name == patch.TypeName);
         var method = type?.Methods.FirstOrDefault(m => m.Name == patch.MethodName && m.Parameters.Count == patch.ParameterCount);
@@ -88,7 +93,7 @@ class Program
         }
     }
 
-    static void MakeCtorPublic(ModuleDefinition module, ConstructorPatch patch)
+    private static void MakeCtorPublic(ModuleDefinition module, ConstructorPatch patch)
     {
         var type = module.Types.FirstOrDefault(t => t.Name == patch.TypeName);
         var ctor = type?.Methods.FirstOrDefault(m => m.IsConstructor && m.Parameters.Count == 0);
@@ -101,7 +106,7 @@ class Program
         }
     }
 
-    static void AddMethodStub(ModuleDefinition module, MethodStub stub)
+    private static void AddMethodStub(ModuleDefinition module, MethodStub stub)
     {
         var type = module.Types.FirstOrDefault(t => t.Name == stub.TypeName);
         if (type == null)
