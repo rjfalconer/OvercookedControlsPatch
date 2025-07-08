@@ -36,8 +36,8 @@ namespace OvercookedControlsPatcher
 
             WriteResourceToDisk(installDir, "OvercookedControlsPatcher.default_controls.input_combined.txt", Path.Combine(installDir, "input_combined.txt"));
             WriteResourceToDisk(installDir, "OvercookedControlsPatcher.default_controls.input_split.txt", Path.Combine(installDir, "input_split.txt"));
-            WriteResourceToDisk(installDir, "OvercookedControlsPatcher.default_controls.input_keyboard_1.txt", Path.Combine(installDir, "input_keyboard_1_DISABLED.txt"));
-            WriteResourceToDisk(installDir, "OvercookedControlsPatcher.default_controls.input_keyboard_2.txt", Path.Combine(installDir, "input_keyboard_2_DISABLED.txt"));
+            //WriteResourceToDisk(installDir, "OvercookedControlsPatcher.default_controls.input_keyboard_1.txt", Path.Combine(installDir, "input_keyboard_1_DISABLED.txt"));
+            //WriteResourceToDisk(installDir, "OvercookedControlsPatcher.default_controls.input_keyboard_2.txt", Path.Combine(installDir, "input_keyboard_2_DISABLED.txt"));
 
             Console.WriteLine("Patch complete :)");
         }

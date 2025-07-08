@@ -92,8 +92,8 @@
     <EmbeddedResource Include="default_controls\input_split.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="default_controls\input_keyboard_1.txt" />
-    <Content Include="default_controls\input_keyboard_2.txt" />
+    <EmbeddedResource Include="default_controls\input_keyboard_1.txt" />
+    <EmbeddedResource Include="default_controls\input_keyboard_2.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
