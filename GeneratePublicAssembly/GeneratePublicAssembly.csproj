@@ -22,4 +22,9 @@
     <Exec Command="&quot;$(TargetDir)GeneratePublicAssembly.exe&quot; &quot;$(InputAssembly)&quot;" />
   </Target>
 
+  <Target Name="DeleteModAssemblyOnClean" AfterTargets="Clean">
+    <Message Importance="High" Text="Cleaning Assembly-CSharp-mod.dll from $(OvercookedDir)..." />
+    <Delete Files="$(OutputAssembly)" />
+  </Target>
+
 </Project>
