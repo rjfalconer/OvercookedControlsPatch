@@ -154,3 +154,7 @@ TODO
 * `C:\Program Files\Epic Games\Overcooked`
 * `D:\Games\Steam\steamapps\common\Overcooked`
 2. Build solution
+
+## Run
+Copy `OvercookedControlsPatcher_Merged.exe` from `OvercookedControlsPatcher\bin\Release` to your Overcooked install directory, and run.
+
