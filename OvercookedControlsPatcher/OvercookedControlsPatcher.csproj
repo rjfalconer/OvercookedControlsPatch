@@ -102,4 +102,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ILRepack.2.0.44\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.44\build\ILRepack.props'))" />
   </Target>
+  <Target Name="ILRepack" AfterTargets="Build" Condition="Exists('bin\$(Configuration)\OvercookedControlsPatcher.exe')">
+    <Message Importance="High" Text="Running ILRepack..." />
+    <Exec Command="&quot;$(ILRepack)&quot; /ndebug /out:bin\$(Configuration)\OvercookedControlsPatcher_Merged.exe bin\$(Configuration)\OvercookedControlsPatcher.exe bin\$(Configuration)\Mono.Cecil.dll bin\$(Configuration)\Mono.Cecil.Mdb.dll bin\$(Configuration)\Mono.Cecil.Pdb.dll bin\$(Configuration)\Mono.Cecil.Rocks.dll" />
+  </Target>
 </Project>
