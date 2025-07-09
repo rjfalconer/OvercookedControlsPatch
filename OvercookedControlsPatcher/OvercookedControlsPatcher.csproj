@@ -1,61 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <ProjectGuid>{F6F05B39-F14C-477F-AFF6-731E73565B3A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>OvercookedControlsPatcher</RootNamespace>
-    <AssemblyName>OvercookedControlsPatcher</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <!-- Set in Directory.Build.props -->
     <OvercookedDir>$(OvercookedPath)</OvercookedDir>
     <ReferenceAssembly>$(OvercookedPath)\Overcooked_Data\Managed\Assembly-CSharp-mod.dll</ReferenceAssembly>
   </PropertyGroup>
-  <Target Name="CheckOvercookedPath" BeforeTargets="Build">
-    <Error Condition="'$(OvercookedDir)' == ''" Text="OvercookedPath is not set. Please specify the game install path in Directory.Build.props file (see .example)" />
-  </Target>
-  <Target Name="EnsureModDllGenerated" BeforeTargets="BeforeBuild">
-    <Message Text="Waiting for Assembly-CSharp-mod.dll..." Importance="High" />
-    <Error Condition="!Exists('$(ReferenceAssembly)')" Text="Missing modded Assembly-CSharp DLL: $(ReferenceAssembly)" />
-  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.2" />
+    <PackageReference Include="ILRepack" Version="2.0.44" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="Assembly-CSharp-mod">
       <HintPath>$(OvercookedPath)\Overcooked_Data\Managed\Assembly-CSharp-mod.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>$(OvercookedPath)\Overcooked_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
@@ -63,37 +27,26 @@
       <HintPath>$(OvercookedPath)\Overcooked_Data\Managed\XInputDotNetPure.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="PatchMetaData.cs" />
-    <Compile Include="PatchSource.cs" />
-    <Compile Include="PatchTools.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="default_controls\input_combined.txt" />
     <EmbeddedResource Include="default_controls\input_split.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="default_controls\input_keyboard_1.txt" />
     <EmbeddedResource Include="default_controls\input_keyboard_2.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ILRepack">
-      <Version>2.0.44</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Mono.Cecil">
-      <Version>0.11.2</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="ILRepack" AfterTargets="Build" Condition="Exists('bin\$(Configuration)\OvercookedControlsPatcher.exe')">
-    <Message Importance="High" Text="Running ILRepack..." />
-    <Exec Command="&quot;$(ILRepack)&quot; /ndebug /out:bin\$(Configuration)\OvercookedControlsPatcher_Merged.exe bin\$(Configuration)\OvercookedControlsPatcher.exe bin\$(Configuration)\Mono.Cecil.dll bin\$(Configuration)\Mono.Cecil.Mdb.dll bin\$(Configuration)\Mono.Cecil.Pdb.dll bin\$(Configuration)\Mono.Cecil.Rocks.dll" />
+
+  <Target Name="CheckOvercookedPath" BeforeTargets="Build">
+    <Error Condition="'$(OvercookedDir)' == ''" Text="OvercookedPath is not set. Please specify the game install path in Directory.Build.props file (see .example)" />
   </Target>
+
+  <Target Name="EnsureModDllGenerated" BeforeTargets="BeforeBuild">
+    <Message Text="Waiting for Assembly-CSharp-mod.dll..." Importance="High" />
+    <Error Condition="!Exists('$(ReferenceAssembly)')" Text="Missing modded Assembly-CSharp DLL: $(ReferenceAssembly)" />
+  </Target>
+
+  <Target Name="ILRepack" AfterTargets="Build" Condition="Exists('bin\$(Configuration)\OvercookedControlsPatcher.dll')">
+    <Message Importance="High" Text="Running ILRepack..." />
+    <Exec Command="&quot;$(ILRepack)&quot; /ndebug /out:bin\$(Configuration)\OvercookedControlsPatcher_Merged.exe bin\$(Configuration)\OvercookedControlsPatcher.dll bin\$(Configuration)\Mono.Cecil.dll bin\$(Configuration)\Mono.Cecil.Mdb.dll bin\$(Configuration)\Mono.Cecil.Pdb.dll bin\$(Configuration)\Mono.Cecil.Rocks.dll" />
+  </Target>
+
 </Project>
