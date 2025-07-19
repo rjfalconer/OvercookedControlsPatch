@@ -4,10 +4,10 @@ using Mono.Cecil;
 
 namespace OvercookedControlsPatcher
 {
-    [AttributeUsage(System.AttributeTargets.Method)]
-    public class AddMethod : System.Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class AddMethod : Attribute
     {
-        public string targetType;
+        public readonly string targetType;
 
         public AddMethod(string targetType)
         {
@@ -22,15 +22,15 @@ namespace OvercookedControlsPatcher
                 return null;
             }
             var targetType = (string)attr.ConstructorArguments[0].Value;
-            AddMethod val = new AddMethod(targetType);
+            var val = new AddMethod(targetType);
             return val;
         }
     }
 
-    [AttributeUsage(System.AttributeTargets.Method)]
-    public class ReplaceMethod : System.Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ReplaceMethod : Attribute
     {
-        public string targetType;
+        public readonly string targetType;
 
         public ReplaceMethod(string targetType)
         {
@@ -45,15 +45,15 @@ namespace OvercookedControlsPatcher
                 return null;
             }
             var targetType = (string)attr.ConstructorArguments[0].Value;
-            ReplaceMethod val = new ReplaceMethod(targetType);
+            var val = new ReplaceMethod(targetType);
             return val;
         }
     }
 
-    [AttributeUsage(System.AttributeTargets.Field)]
-    public class AddField : System.Attribute
+    [AttributeUsage(AttributeTargets.Field)]
+    public class AddField : Attribute
     {
-        public string targetType;
+        public readonly string targetType;
 
         public AddField(string targetType)
         {
@@ -68,7 +68,7 @@ namespace OvercookedControlsPatcher
                 return null;
             }
             var targetType = (string)attr.ConstructorArguments[0].Value;
-            AddField val = new AddField(targetType);
+            var val = new AddField(targetType);
             return val;
         }
     }

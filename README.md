@@ -145,3 +145,16 @@ This mod allows you to rebind the keyboard controls to whatever you want.
 - GreaterThan
 - QuestionMark
 </details>
+
+## Contributing
+TODO
+
+## Build
+1. Change `OvercookedPath` in `Directory.Build.props` to the directory containing your Overcooked install, e.g.:
+* `C:\Program Files\Epic Games\Overcooked`
+* `D:\Games\Steam\steamapps\common\Overcooked`
+2. Build solution
+
+## Run
+Copy `OvercookedControlsPatcher_Merged.exe` from `OvercookedControlsPatcher\bin\Release` to your Overcooked install directory, and run.
+

@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Change this path to wherever Overcooked is installed on your machine -->
+    <OvercookedPath>D:\Tools\Epic Games\Overcooked</OvercookedPath>
+  </PropertyGroup>
+</Project>
