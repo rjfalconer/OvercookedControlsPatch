@@ -5,11 +5,10 @@ The game uses ctrl and shift, but this makes Windows switch keyboard layout, whi
 
 This mod allows you to rebind the keyboard controls to whatever you want.
 
-1. [Download the patcher zip file](https://github.com/Wouterdek/OvercookedControlsPatch/releases/download/1.0/patch.zip)
-2. Extract `OvercookedControlsPatch.exe` from the zip to the Overcooked installation folder.
+1. [Download OvercookecControlsPatcher_Merged.exe from latest release](https://github.com/rjfalconer/OvercookedControlsPatch/releases)
+2. Copy to the Overcooked installation folder.
 3. Run the patch.
 4. If all went well, you now have `input_combined.txt` and `input_split.txt`. You can edit these files to change the keybindings for 1-keyboard-player and 2-keyboard-players respectively. Change only the parts after the equals sign (`=`).
-
 
 <details>
   <summary>Valid key names</summary>
@@ -147,7 +146,7 @@ This mod allows you to rebind the keyboard controls to whatever you want.
 </details>
 
 ## Contributing
-TODO
+Any PRs welcome
 
 ## Build
 1. Change `OvercookedPath` in `Directory.Build.props` to the directory containing your Overcooked install, e.g.:
@@ -157,4 +156,3 @@ TODO
 
 ## Run
 Copy `OvercookedControlsPatcher_Merged.exe` from `OvercookedControlsPatcher\bin\Release` to your Overcooked install directory, and run.
-
